@@ -72,73 +72,53 @@ for(let i = 0; i < rows + 1; i++){
 }
 
 var shape = null;
+var shapeShade = null;
 
 
 /**
  * ---------- GAME CALLBACKS ----------
  */
 
-function fillFields(){
-    for(const part of shape.positions){
-        fields[part.y][part.x] = shape.color;
-    }
-    tetris();
-}
-
-
-function tetris(){
-    let tetris = false;
-    let rowsBroken = 0;
+function moveNewShape(){
     
+    if(shape == null) return;
+    let stop = false;
 
-    let r = rows - 1;
-
-    while(r >= 0){
-        let c = 0;
-        
-        while(c < cols){
-            if(fields[r][c] == 0){break;}
-            c++;
-        }
-
-        if(c == cols){
-            tetris = true;
-            rowsBroken++;
-        }else if(c != cols && tetris){
+    for(const part of shape.positions){
+        if(fields[part.y + 1][part.x] != 0){
+            stop = true;
+            fillFields();
+            shape = null;
             break;
         }
-        
-        r--;
     }
 
-
-    for(let i = r; i >= 0; i--){
-        for(let j = 0; j < cols; j++){
-            fields[i + rowsBroken][j] = fields[i][j];
-            fields[i][j] = 0;
+    if(!stop){
+        for(let part of shape.positions){
+            part.y = part.y + directions.Down.dy;
         }
     }
     
 }
-
 
 function moveShapeHorizontally(dir){
 
-    let isOnMargin = false;
+    if(shape == null) return;
+
+    let collision = false;
 
     for(const part of shape.positions){
         if(fields[part.y][part.x + dir.dx] != 0){
-            isOnMargin = true;
+            collision = true;
             break;
         }
     }
 
-    if(!isOnMargin){
+    if(!collision){
         for(let part of shape.positions){
             part.x = part.x + dir.dx;
         }
     }
-
 }
 
 function getRandomShape(){
@@ -172,40 +152,13 @@ function getRandomShape(){
     }
 }
 
-
-function tetris(){
-    let tetris = false;
-    let rowsBroken = 0;
-    
-
-    let r = rows - 1;
-
-    while(r >= 0){
-        let c = 0;
-        
-        while(c < cols){
-            if(fields[r][c] == 0){break;}
-            c++;
-        }
-
-        if(c == cols){
-            tetris = true;
-            rowsBroken++;
-        }else if(c != cols && tetris){
-            break;
-        }
-        
-        r--;
-    }
-
-
-    for(let i = r; i >= 0; i--){
-        for(let j = 0; j < cols; j++){
-            fields[i + rowsBroken][j] = fields[i][j];
-            fields[i][j] = 0;
+function isGameOver(){
+    for(let part of shape.positions){
+        if(fields[part.y][part.x] != 0){
+            return true;
         }
     }
-    
+    return false;
 }
 
 function drawFields(){
@@ -227,65 +180,52 @@ function drawFields(){
     }
 }
 
-function moveShapeHorizontally(dir){
-
-    let isOnMargin = false;
-
-    for(const part of shape.positions){
-        if(fields[part.y][part.x + dir.dx] != 0){
-            isOnMargin = true;
-            break;
-        }
-    }
-
-    if(!isOnMargin){
-        for(let part of shape.positions){
-            part.x = part.x + dir.dx;
-        }
-    }
-
-}
-
 function drawNewShape(){
    
-    if(shape == null){getRandomShape();}
+    if(shape == null)getRandomShape();
+
+    drawShapeShade();
 
     ctx.beginPath();
-    
     for(const part of shape.positions){
         ctx.rect(part.x * shapeWidth, part.y * shapeWidth, shapeWidth, shapeWidth);
         ctx.fillStyle = shape.color;
         ctx.fill();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = colors.Black;
         ctx.stroke();
     }
-
     ctx.closePath();
+
+    
 }
 
-
-function moveNewShape(){
-    
-    if(shape == null){return;}
+function drawShapeShade(){
+    let vertOffset = -1;
     let stop = false;
+    while(!stop){
+        vertOffset += 1;
+        for(const part of shape.positions){
+            if(fields[part.y + vertOffset][part.x] != 0){
+                stop = true;
+                vertOffset -= 1;
+                break;
+            }
+        }
+    }
 
+    ctx.beginPath();
     for(const part of shape.positions){
-        if(fields[part.y + 1][part.x] != 0){
-            stop = true;
-            fillFields();
-            shape = null;
-            break;
-        }
+        ctx.rect(part.x * shapeWidth, (part.y + vertOffset) * shapeWidth, shapeWidth, shapeWidth);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = colors.Gray
+        ctx.stroke();
     }
+    ctx.closePath();
+   
 
-    if(!stop){
-        for(let part of shape.positions){
-            part.y = part.y + directions.Down.dy;
-        }
-    }
-    
 }
+
 
 function fillFields(){
     for(const part of shape.positions){
@@ -347,38 +287,7 @@ function tetris(){
         }
         
         
-    }
-
-
-    for(let i = r; i >= 0; i--){
-        for(let j = 0; j < cols; j++){
-            fields[i + rowsBroken][j] = fields[i][j];
-            fields[i][j] = 0;
-        }
-    }
-    
-}
-
-
-function moveShapeHorizontally(dir){
-
-    if(shape == null) return;
-
-    let collision = false;
-
-    for(const part of shape.positions){
-        if(fields[part.y][part.x + dir.dx] != 0){
-            collision = true;
-            break;
-        }
-    }
-
-    if(!collision){
-        for(let part of shape.positions){
-            part.x = part.x + dir.dx;
-        }
-    }
-
+    }    
 }
 
 function rotateShape(){
@@ -429,11 +338,18 @@ function cleanCanvas(){
 function gameEngine(){
     cleanCanvas();
 
-    drawNewShape();
-    
     drawFields();
-}
 
+    drawNewShape();
+
+    if(isGameOver()){
+        alert("GAME OVER!");
+        clearInterval(intervalMovement);
+        clearInterval(intervalCanvas);
+        document.location.reload();
+    }
+    
+}
 
 function keyDownHandler(e) {
     switch(e.key){
@@ -451,8 +367,6 @@ function keyDownHandler(e) {
             break;
 
     }
-
-
 }
 
 function keyUpHandler(e){

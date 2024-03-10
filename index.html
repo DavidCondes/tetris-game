@@ -3,21 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet'>
     <title>Tetris</title>
 </head>
 <body>
-    <h1>Tetris game</h1>
+
+    <div class="main-container">
+        <div class="container">
+            <div>
+                <h1>Tetris game</h1>
+            </div>
+            
+
+            <div class="gamed">
+                <div class="tetris">
+                    <canvas id="gameCanvas" width="300" height="600"></canvas>
+
+                    <div class="scored">
+                        <p class="painline">Level: <span id="level">1</span></p>
+                        <p class="painline">Score: <span id="score">0</span></p>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="howtod">
+                <h2>How to play</h2>
+                <ul>
+                    <li>Press the keys <img src="./assets/control-left.png" height="30px">  and  <img src="./assets/control-right.png" height="30px"> to move the shape horizontally</li>
+                    <li>Press <img src="./assets/control-up.png" height="30px"> to rotate the shape</li>
+                    <li>Press <img src="./assets/control-down.png" height="30px"> to accelerate the fall of the shape</li>
+
+                </ul>
+            </div>
+
+            <div class="footerd">
+                <p class="painline">Made by David Condes >></p>
+                
+                <a href="#">Source code</a>
+            
+            </div>
+
+        </div>
+    </div>
+
 
     
-    
     <div>
-        <canvas id="gameCanvas" width="300" height="600"></canvas>
+        
     </div>
-    <div>
-        <p>Level: <span id="level">1</span></p>
-        <p>Score: <span id="score">0</span></p>
-    </div>
+ 
     
 
     <script type="text/javascript" src="shapes.js"></script>
